@@ -79,17 +79,20 @@
         h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
         .tagline { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;}
 
-        /* Screen Management */
+        /* Screen Management - Smooth Fades */
         .screen {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-            width: 100%;
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            z-index: 5;
         }
         .screen.active {
-            display: block;
-            opacity: 1;
+            position: relative;
+            opacity: 1; visibility: visible;
+            z-index: 10;
         }
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -114,9 +117,9 @@
         /* ========================
            2. INPUTS & BUTTONS
            ======================== */
-        /* Floating logic */
+        /* Floating logic mapped ONLY to floating-input class */
         .floating-group { position: relative; margin-bottom: 1.8rem; text-align: left; }
-        .floating-group input {
+        .floating-input {
             width: 100%;
             background: rgba(0,0,0,0.4);
             border: 1px solid var(--glass-border);
@@ -127,23 +130,23 @@
             font-size: 1rem;
             transition: var(--transition);
         }
-        .floating-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); background: rgba(0,0,0,0.6); }
+        .floating-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); background: rgba(0,0,0,0.6); }
         .floating-group label {
             position: absolute;
             left: 1.2rem; top: 50%; transform: translateY(-50%);
             color: var(--text-muted); font-size: 1rem; transition: var(--transition); pointer-events: none;
         }
         /* Float when focused or filled */
-        .floating-group input:focus ~ label,
-        .floating-group input:not(:placeholder-shown) ~ label,
-        .floating-group input.has-val ~ label {
+        .floating-input:focus ~ label,
+        .floating-input:not(:placeholder-shown) ~ label,
+        .floating-input.has-val ~ label {
             top: 0.6rem; font-size: 0.75rem; color: var(--primary); transform: translateY(0); display: block;
         }
         /* Date picker fix */
-        .floating-group input[type="date"] { padding-top: 1.5rem; padding-bottom: 0.5rem; color: transparent; }
-        .floating-group input[type="date"]:focus,
-        .floating-group input[type="date"].has-val { color: var(--text-main); }
-        .floating-group input[type="date"] ~ label { top: 0.6rem; font-size: 0.75rem; color: var(--primary); transform: translateY(0); }
+        input[type="date"].floating-input { padding-top: 1.5rem; padding-bottom: 0.5rem; color: transparent; }
+        input[type="date"].floating-input:focus,
+        input[type="date"].floating-input.has-val { color: var(--text-main); }
+        input[type="date"].floating-input ~ label { top: 0.6rem; font-size: 0.75rem; color: var(--primary); transform: translateY(0); }
         
         .toggle-password {
             position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%);
@@ -187,7 +190,7 @@
            3. UI COMPONENTS
            ======================== */
         /* Login Screen Specifics */
-        #loginScreen { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; position: relative; }
+        #loginScreen { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; position: absolute; }
         .login-card { width: 100%; max-width: 480px; position: relative; z-index: 10; }
 
         /* Navbar */
@@ -198,9 +201,9 @@
         /* Wallet Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.4s ease;
+            display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
         }
-        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-content { transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .modal-overlay.active .modal-content { transform: scale(1); }
         
@@ -219,9 +222,9 @@
         /* Loader */
         .loader-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(10px);
-            display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 5000; opacity: 0; transition: opacity 0.3s ease;
+            display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 5000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
         }
-        .loader-overlay.active { display: flex; opacity: 1; }
+        .loader-overlay.active { opacity: 1; visibility: visible; }
         .spinner-container { position: relative; width: 120px; height: 120px; margin-bottom: 2rem; }
         
         .spinner-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--primary); animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
@@ -262,6 +265,10 @@
         .rec-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 1.8rem; border-radius: 16px; transition: var(--transition); display: flex; flex-direction: column; }
         .rec-card:hover { border-color: rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.05); transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0, 229, 255, 0.1); }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Fade-in Animation */
+        .fade-in { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeInScale { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
     </style>
 </head>
 <body>
@@ -326,26 +333,26 @@
     <!-- SCREEN 1: LOGIN (Full Height Glassmorphism)    -->
     <!-- ============================================== -->
     <div id="loginScreen" class="screen active">
-        <div class="glass-card login-card">
+        <div class="glass-card login-card fade-in" style="animation-delay: 0.2s;">
             <h2 style="text-align: center; margin-bottom: 1.5rem; font-size: 2.2rem; letter-spacing: 2px;">OPTIWEALTH</h2>
             <p style="text-align: center; color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem;">Enter credentials to access quantum optimization interface.</p>
             
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="floating-group">
-                    <input type="text" id="usernameInput" placeholder=" " required oninput="checkInputVal(this)">
+                    <input type="text" id="usernameInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
                     <label>Username</label>
                 </div>
                 <div class="floating-group">
                     <!-- Date picker styled via CSS -->
-                    <input type="date" id="dobInput" required onchange="checkInputVal(this)">
+                    <input type="date" id="dobInput" class="floating-input" required onchange="checkInputVal(this)">
                     <label>Date of Birth</label>
                 </div>
                 <div class="floating-group">
-                    <input type="email" id="emailInput" placeholder=" " required oninput="checkInputVal(this)">
+                    <input type="email" id="emailInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
                     <label>Email ID</label>
                 </div>
                 <div class="floating-group">
-                    <input type="password" id="passwordInput" placeholder=" " required oninput="checkInputVal(this)">
+                    <input type="password" id="passwordInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
                     <label>Password</label>
                     <span class="toggle-password" onclick="togglePassword()">👁️</span>
                 </div>
@@ -359,7 +366,7 @@
     <!-- SCREEN 2: DASHBOARD (Finance App Core)         -->
     <!-- ============================================== -->
     <div id="dashboardScreen" class="screen">
-        <div class="container">
+        <div class="container fade-in">
             <!-- Navbar -->
             <nav>
                 <div class="logo">
@@ -383,8 +390,8 @@
             <div id="input-section" class="glass-card" style="margin-bottom: 2rem; max-width: 850px; margin-left: auto; margin-right: auto;">
                 <h3 style="margin-bottom: 2.5rem; font-size: 1.5rem;">Configure Your Portfolio</h3>
                 
-                <div class="floating-group" style="margin-bottom: 2.5rem;">
-                    <label style="position:static; transform:none; display:block; margin-bottom: 1rem; color: #b4c5e4;">Investment Budget (INR)</label>
+                <div style="margin-bottom: 2.5rem;">
+                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Investment Budget (INR)</label>
                     <div class="flex-between" style="margin-bottom: 1rem;">
                         <span style="color: var(--text-muted); font-size: 0.9rem;">₹10,000</span>
                         <span class="budget-display">₹<span id="budgetFormatted">10,00,000</span></span>
@@ -393,8 +400,8 @@
                     <input type="range" id="budgetRange" min="10000" max="10000000" step="10000" value="1000000">
                 </div>
 
-                <div class="floating-group">
-                    <label style="position:static; transform:none; display:block; margin-bottom: 1rem; color: #b4c5e4;">Add Assets to Portfolio</label>
+                <div>
+                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Add Assets to Portfolio</label>
                     <div style="display: flex; gap: 1rem;">
                         <input type="text" id="stockInput" class="stock-in" placeholder="Enter stock ticker (e.g. RELIANCE, TCS)">
                         <button class="btn btn-outline" onclick="addStock()" style="padding: 0 2rem;">Add</button>
